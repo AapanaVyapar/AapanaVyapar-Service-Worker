@@ -1,7 +1,7 @@
 package structs
 
 import (
-	"aapanavyapar-service-viewprovider/constants"
+	"aapanavyapar-service-worker/constants"
 	"encoding/json"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson/primitive"

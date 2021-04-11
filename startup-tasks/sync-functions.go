@@ -1,7 +1,7 @@
 package services
 
 import (
-	"aapanavyapar-service-viewprovider/helpers"
+	"aapanavyapar-service-worker/helpers"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"

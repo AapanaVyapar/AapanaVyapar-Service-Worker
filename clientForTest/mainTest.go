@@ -1,7 +1,7 @@
 package main
 
 import (
-	services "aapanavyapar-service-viewprovider/startup-tasks"
+	services "aapanavyapar-service-worker/startup-tasks"
 	"context"
 	"fmt"
 	"github.com/go-redis/redis/v8"

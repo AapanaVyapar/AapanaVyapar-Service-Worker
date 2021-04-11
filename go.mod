@@ -1,4 +1,4 @@
-module aapanavyapar-service-viewprovider
+module aapanavyapar-service-worker
 
 go 1.15
 

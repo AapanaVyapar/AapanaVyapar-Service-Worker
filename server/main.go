@@ -30,12 +30,12 @@ func SyncWithAddToFavorite(ctx context.Context, dataBase *services.DataSources, 
 		readGroup := dataBase.Cash.ReadFromFavStream(ctx, 10, 200, myKeyId)
 		if readGroup.Err() != nil {
 			if strings.Contains(readGroup.Err().Error(), "timeout") {
-				fmt.Println("TimeOUT")
+				fmt.Println("FAV : TimeOUT")
 				continue
 
 			}
 			if readGroup.Err() == redis.Nil {
-				fmt.Println("CART : No Data Available")
+				fmt.Println("FAV : No Data Available")
 				continue
 
 			}
@@ -51,7 +51,7 @@ func SyncWithAddToFavorite(ctx context.Context, dataBase *services.DataSources, 
 
 		if len(data[0].Messages) == 0 {
 			checkBackLog = false
-			fmt.Println("Started Checking For New Messages ..!!")
+			fmt.Println("FAV : Started Checking For New Messages ..!!")
 			continue
 
 		}
@@ -61,7 +61,7 @@ func SyncWithAddToFavorite(ctx context.Context, dataBase *services.DataSources, 
 		for _, val = range data[0].Messages {
 			err = dataBase.PerformAddToFavorite(ctx, &val)
 			if err != nil {
-				fmt.Println("Context Error Please Check For Data Base Connectivity, Network Error Or Any Other Dependency Problem")
+				fmt.Println("FAV : Context Error Please Check For Data Base Connectivity, Network Error Or Any Other Dependency Problem")
 				checkBackLog = true
 				val.ID = "0"
 				break

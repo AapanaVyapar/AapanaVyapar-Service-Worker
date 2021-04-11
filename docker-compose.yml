@@ -5,6 +5,8 @@ services:
   updater:
     build: .
     restart: on-failure
-    container_name: updater
+    env_file:
+      - .env
+    container_name: ${REDIS_WORKER_NAME}
     networks:
       aappanavypar-backend:

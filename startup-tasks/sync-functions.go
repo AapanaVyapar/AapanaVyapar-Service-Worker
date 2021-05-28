@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"strconv"
 	"time"
 )
 
@@ -19,6 +20,8 @@ func (dataSource *DataSources) PerformAddToFavorite(ctx context.Context, val *re
 	uId := val.Values["uId"].(string)
 	prodId := val.Values["prodId"].(string)
 	operation := val.Values["operation"].(string)
+
+	likes, _ := strconv.ParseUint(val.Values["likes"].(string), 10, 64)
 
 	fmt.Println("FAV : ", uId)
 	fmt.Println("FAV : ", prodId)
@@ -34,21 +37,42 @@ func (dataSource *DataSources) PerformAddToFavorite(ctx context.Context, val *re
 	dataContext, cancel := context.WithDeadline(ctx, time.Now().Add(time.Minute))
 
 	if operation == "+" {
-		err := dataSource.Data.AddToFavoritesUserData(dataContext, uId, productId)
-		fmt.Println("FAV : ", err)
-		if err != nil && helpers.ContextError(dataContext) != nil {
+		errData := dataSource.Data.AddToFavoritesUserData(dataContext, uId, productId)
+		fmt.Println("FAV : ", errData)
+		if errData != nil && helpers.ContextError(dataContext) != nil {
 			cancel()
-			return err
+			return errData
+		}
+
+		if errData == nil {
+			likes += 1
+
+			err = dataSource.Cash.UpdateLikeOfProduct(ctx, prodId, likes)
+			fmt.Println("FAV : ", err)
+			if err != nil && helpers.ContextError(dataContext) != nil {
+				cancel()
+				return err
+			}
 		}
 
 	} else {
-		err := dataSource.Data.DelFromFavoritesUserData(dataContext, uId, productId)
-		if err != nil && helpers.ContextError(dataContext) != nil {
-			fmt.Println("FAV : ", err)
+		errData := dataSource.Data.DelFromFavoritesUserData(dataContext, uId, productId)
+		if errData != nil && helpers.ContextError(dataContext) != nil {
+			fmt.Println("FAV : ", errData)
 			cancel()
-			return err
+			return errData
 		}
 
+		if errData == nil {
+			likes -= 1
+
+			err = dataSource.Cash.UpdateLikeOfProduct(ctx, prodId, likes)
+			fmt.Println("FAV : ", err)
+			if err != nil && helpers.ContextError(dataContext) != nil {
+				cancel()
+				return err
+			}
+		}
 	}
 
 	fmt.Println("FAV : Done Acknowledge")

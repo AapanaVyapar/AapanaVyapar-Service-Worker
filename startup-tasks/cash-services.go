@@ -4,6 +4,8 @@ import (
 	"aapanavyapar-service-worker/configurations/redisdb"
 	"context"
 	"github.com/go-redis/redis/v8"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"os"
 	"time"
 )
@@ -71,5 +73,14 @@ func (dataBase *RedisDataBase) ReadFromCartStream(ctx context.Context, count int
 		NoAck:    false,
 	})
 	return readGroup
+
+}
+
+func (dataBase *RedisDataBase) UpdateLikeOfProduct(ctx context.Context, productId string, likes uint64) error {
+	err := dataBase.Cash.HSet(ctx, "product:"+productId, "likesOfProduct", likes).Err()
+	if err != nil {
+		return status.Errorf(codes.Internal, "unable to add data to hash of Cash  : %w", err)
+	}
+	return nil
 
 }

@@ -219,6 +219,65 @@ func (dataBase *MongoDataBase) DelFromCartUserData(context context.Context, user
 	return fmt.Errorf("unable to delete from cart")
 }
 
+func (dataBase *MongoDataBase) IncreaseLikesInProductData(context context.Context, productId primitive.ObjectID) error {
+
+	productData := mongodb.OpenProductDataCollection(dataBase.Data)
+
+	result, err := productData.UpdateOne(context,
+		bson.M{
+			"_id": productId,
+		},
+		bson.M{
+			"$inc": bson.M{
+				"likes": 1,
+			},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(result.ModifiedCount)
+
+	if result.ModifiedCount > 0 || result.MatchedCount > 0 {
+		return nil
+	}
+
+	return fmt.Errorf("max product limit reach") // Check for inconsistency
+
+}
+
+func (dataBase *MongoDataBase) DecreaseLikesInProductData(context context.Context, productId primitive.ObjectID) error {
+
+	productData := mongodb.OpenProductDataCollection(dataBase.Data)
+
+	result, err := productData.UpdateOne(context,
+		bson.M{
+			"_id":   productId,
+			"likes": bson.M{"$gte": 0},
+		},
+		bson.M{
+			"$inc": bson.M{
+				"likes": -1,
+			},
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(result.ModifiedCount)
+
+	if result.ModifiedCount > 0 || result.MatchedCount > 0 {
+		return nil
+	}
+
+	return fmt.Errorf("max product limit reach") // Check for inconsistency
+
+}
+
 func (dataBase *MongoDataBase) AddToFavoritesUserData(context context.Context, userId string, productId primitive.ObjectID) error {
 
 	//if err := dataBase.IsExistProductExist(context, "_id", productId); err != nil {

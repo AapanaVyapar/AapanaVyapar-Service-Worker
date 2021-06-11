@@ -44,6 +44,13 @@ func (dataSource *DataSources) PerformAddToFavorite(ctx context.Context, val *re
 			return errData
 		}
 
+		errData = dataSource.Data.IncreaseLikesInProductData(dataContext, productId)
+		fmt.Println("FAV : ", errData)
+		if errData != nil && helpers.ContextError(dataContext) != nil {
+			cancel()
+			return errData
+		}
+
 		if errData == nil {
 			likes += 1
 
@@ -63,14 +70,23 @@ func (dataSource *DataSources) PerformAddToFavorite(ctx context.Context, val *re
 			return errData
 		}
 
-		if errData == nil {
-			likes -= 1
+		errData = dataSource.Data.DecreaseLikesInProductData(dataContext, productId)
+		if errData != nil && helpers.ContextError(dataContext) != nil {
+			fmt.Println("FAV : ", errData)
+			cancel()
+			return errData
+		}
 
-			err = dataSource.Cash.UpdateLikeOfProduct(ctx, prodId, likes)
-			fmt.Println("FAV : ", err)
-			if err != nil && helpers.ContextError(dataContext) != nil {
-				cancel()
-				return err
+		if errData == nil {
+			if likes != 0 {
+				likes -= 1
+
+				err = dataSource.Cash.UpdateLikeOfProduct(ctx, prodId, likes)
+				fmt.Println("FAV : ", err)
+				if err != nil && helpers.ContextError(dataContext) != nil {
+					cancel()
+					return err
+				}
 			}
 		}
 	}
